@@ -1,0 +1,270 @@
+<!-- index.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    th,
+    td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+
+    th {
+        background-color: #f2f2f2;
+    }
+
+    canvas {
+        border: 1px solid #ddd;
+    }
+
+    /* Modal styles */
+    .modal {
+        display: none;
+        /* Ẩn modal mặc định */
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.4);
+    }
+
+    .modal-content {
+        background-color: #fefefe;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+    }
+
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    .close:hover,
+    .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    /* Button styles */
+    #show-chart-button {
+        position: relative;
+        z-index: 999;
+        margin-bottom: 10px;
+        margin-right: 10px;
+        float: right;
+    }
+
+    #symbol-filter {
+        margin-bottom: 10px;
+    }
+
+    #chart-options {
+        margin-bottom: 10px;
+        margin-right: 10px;
+        float: right;
+    }
+</style>
+<h1>Welcome to Stock Information</h1>
+<button id="show-chart-button">Show Chart</button>
+<input type="text" id="symbol-filter" placeholder="Filter by Symbol...">
+<select id="chart-options">
+    <option value="LastPrice">Last Price</option>
+    <option value="LastVol">Last Volume</option>
+    <option value="BidPrice1">Bid Price</option>
+    <option value="BidVol1">Bid Volume</option>
+    <option value="AskPrice1">Ask Price</option>
+    <option value="AskVol1">Ask Volume</option>
+</select>
+<table id="stock-table">
+    <thead>
+        <tr>
+            <th>Symbol</th>
+            <th>Last Price</th>
+            <th>Last Volume</th>
+            <th>Bid Price</th>
+            <th>Bid Volume</th>
+            <th>Ask Price</th>
+            <th>Ask Volume</th>
+        </tr>
+    </thead>
+    <tbody id="stock-table-body">
+        <!-- Các hàng dữ liệu sẽ được thêm vào đây động -->
+    </tbody>
+</table>
+
+<!-- Modal -->
+<div id="chart-modal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <canvas id="chart"></canvas>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var socket = io();
+        var chartData = {}; // Đối tượng lưu trữ dữ liệu từ máy chủ
+
+        var tableBody = document.getElementById('stock-table-body');
+        var chartLabels = []; // Mảng lưu trữ nhãn biểu đồ
+        var selectedOption = "LastPrice"; // Tuỳ chọn mặc định cho biểu đồ
+
+        // Hàm cập nhật hàng trong bảng dữ liệu
+        function updateTableRow(symbol, data) {
+            if (!chartData[symbol]) {
+                chartData[symbol] = {};
+            }
+            chartData[symbol].LastPrice = data.LastPrice;
+            chartData[symbol].LastVol = data.LastVol;
+            chartData[symbol].BidPrice1 = data.BidPrice1;
+            chartData[symbol].BidVol1 = data.BidVol1;
+            chartData[symbol].AskPrice1 = data.AskPrice1;
+            chartData[symbol].AskVol1 = data.AskVol1;
+
+            if (chartLabels.indexOf(symbol) === -1) {
+                chartLabels.push(symbol);
+            }
+
+            if (!document.getElementById(`row-${symbol}`)) {
+                var newRow = tableBody.insertRow();
+                newRow.id = `row-${symbol}`;
+                var symbolCell = newRow.insertCell();
+                symbolCell.textContent = symbol;
+                symbolCell.id = `symbol-${symbol}`;
+                newRow.insertCell().id = `last-price-${symbol}`;
+                newRow.insertCell().id = `last-volume-${symbol}`;
+                newRow.insertCell().id = `bid-price-${symbol}`;
+                newRow.insertCell().id = `bid-volume-${symbol}`;
+                newRow.insertCell().id = `ask-price-${symbol}`;
+                newRow.insertCell().id = `ask-volume-${symbol}`;
+            }
+            var row = document.getElementById(`row-${symbol}`);
+            row.cells[1].textContent = chartData[symbol].LastPrice;
+            row.cells[2].textContent = chartData[symbol].LastVol;
+            row.cells[3].textContent = chartData[symbol].BidPrice1;
+            row.cells[4].textContent = chartData[symbol].BidVol1;
+            row.cells[5].textContent = chartData[symbol].AskPrice1;
+            row.cells[6].textContent = chartData[symbol].AskVol1;
+        }
+
+        // Lắng nghe sự kiện 'market_data' từ máy chủ
+        socket.on('market_data', function (data) {
+            if (typeof data.Content === "string") {
+                data.Content = JSON.parse(data.Content);
+            }
+            updateTableRow(data.Content.Symbol, data.Content);
+        });
+
+        // Lắng nghe sự kiện thay đổi tuỳ chọn biểu đồ
+        var chartOptionsSelect = document.getElementById('chart-options');
+        chartOptionsSelect.addEventListener('change', function (event) {
+            selectedOption = event.target.value;
+            updateChart();
+        });
+
+        // Lắng nghe sự kiện nhập vào bộ lọc ký tự
+        const symbolFilterInput = document.getElementById('symbol-filter');
+        symbolFilterInput.addEventListener('input', function () {
+            const filterText = this.value.toLowerCase();
+            const rows = tableBody.querySelectorAll('tr');
+
+            rows.forEach(row => {
+                const symbolCell = row.querySelector('td:first-child');
+                if (symbolCell) {
+                    const symbol = symbolCell.textContent.toLowerCase();
+                    row.style.display = symbol.includes(filterText) ? 'table-row' : 'none';
+                }
+            });
+
+            // Cập nhật biểu đồ sau khi lọc
+            updateChart();
+        });
+
+        // Lắng nghe sự kiện click nút hiển thị biểu đồ
+        var modal = document.getElementById("chart-modal");
+        var btn = document.getElementById("show-chart-button");
+        var span = document.getElementsByClassName("close")[0];
+        btn.onclick = function () {
+            modal.style.display = "block";
+            updateChart(); // Cập nhật biểu đồ khi hiển thị modal
+        }
+
+        // Lắng nghe sự kiện click để đóng modal
+        span.onclick = function () {
+            modal.style.display = "none";
+        }
+
+        // Lắng nghe sự kiện click bên ngoài modal
+        window.onclick = function (event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        // Hàm cập nhật biểu đồ
+        function updateChart() {
+            const filterText = symbolFilterInput.value.toLowerCase();
+            const ctx = document.getElementById('chart').getContext('2d');
+            const filteredLabels = chartLabels.filter(label => label.toLowerCase().includes(filterText));
+            const filteredData = filteredLabels.map(label => chartData[label][selectedOption]);
+
+            // Xóa biểu đồ cũ trước khi vẽ biểu đồ mới
+            if (window.myChart) {
+                window.myChart.destroy();
+            }
+
+            window.myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: filteredLabels,
+                    datasets: [{
+                        label: selectedOption,
+                        data: filteredData,
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+    });
+    document.addEventListener("DOMContentLoaded", function () {
+        // Hàm để gọi lại endpoint khi trang được tải
+        function fetchData() {
+            fetch('/fetch_market_data') // Đổi '/fetch_market_data' thành endpoint của bạn
+                .then(response => response.json())
+                .then(data => {
+                    // Xử lý dữ liệu nhận được ở đây, có thể cập nhật giao diện người dùng
+                    updateTableWithData(data); // Gọi hàm để cập nhật bảng dữ liệu
+                })
+                .catch(error => {
+                    console.error('Error fetching market data:', error);
+                });
+        }
+
+        // Gọi lại fetchData() khi trang được tải
+        fetchData();
+    });
+</script>
+{% endblock %}

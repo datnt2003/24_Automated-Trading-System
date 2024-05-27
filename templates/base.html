@@ -1,0 +1,50 @@
+<!-- base.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Information</title>
+    <!-- Các thư viện và CSS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* CSS đã có từ trước */
+    </style>
+</head>
+<body>
+    <header>
+        <!-- Header của trang (có thể thêm logo, tiêu đề) -->
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="/">Home</a></li>
+            {% if current_user.is_authenticated %}
+                <li><a href="/market_data">Market</a></li>
+                <li><a href="/portfolio">Portfolio</a></li>
+                {% if current_user.is_admin %}
+                    <li><a href="/admin">Admin</a></li>
+                {% endif %}
+                <li><a href="/logout">Logout</a></li>
+            {% else %}
+                <li><a href="/login">Login</a></li>
+                <li><a href="/register">Register</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer>
+        <!-- Footer của trang (thêm thông tin liên hệ, bản quyền) -->
+    </footer>
+
+    <script>
+        // JavaScript đã có từ trước
+    </script>
+</body>
+</html>

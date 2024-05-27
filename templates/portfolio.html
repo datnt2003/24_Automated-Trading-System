@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Portfolio</title>
+</head>
+<body>
+    <h1>My Portfolio</h1>
+    {% if error_message %}
+    <p style="color: red;">{{ error_message }}</p>
+    {% endif %}
+    <form action="/trade" method="POST">
+        <label for="symbol">Symbol:</label>
+        <input type="text" id="symbol" name="symbol" required><br><br>
+        <label for="quantity">Quantity:</label>
+        <input type="number" id="quantity" name="quantity" required><br><br>
+        <label for="trade_type">Type:</label>
+        <select id="trade_type" name="trade_type">
+            <option value="buy">Buy</option>
+            <option value="sell">Sell</option>
+        </select><br><br>
+        <!-- Add checkbox for auto trade -->
+        <input type="checkbox" id="auto_trade" name="auto_trade">
+        <label for="auto_trade">Enable auto trade</label><br><br>
+        <input type="submit" value="Trade">
+        <!-- Add button for manual auto trade -->
+        <button type="button" id="manual_auto_trade">Manual Auto Trade</button>
+    </form>
+
+    <h2>Your Transactions</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Quantity</th>
+                <th>Type</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for transaction in transactions %}
+            <tr>
+                <td>{{ transaction.symbol }}</td>
+                <td>{{ transaction.quantity }}</td>
+                <td>{{ transaction.trade_type }}</td>
+                <td>{{ transaction.date }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>Current Stock Quantity</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Quantity</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for symbol, quantity in symbol_quantities.items() %}
+            <tr>
+                <td>{{ symbol }}</td>
+                <td>{{ quantity }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>Suggested Stock to Buy</h2>
+    <p id="suggested_stock"></p>
+
+    <script>
+        // Function to fetch suggested stock from the server
+        function fetchSuggestedStock() {
+            fetch('/suggest_stock_to_buy')
+            .then(response => response.json())
+            .then(data => {
+                const suggestedStock = data.suggested_symbol;
+                document.getElementById('suggested_stock').innerText = `Suggested stock to buy: ${suggestedStock}`;
+            })
+            .catch(error => console.error('Error fetching suggested stock:', error));
+        }
+
+        // Call the function when the page loads
+        window.onload = fetchSuggestedStock;
+
+        // Add event listener to the manual auto trade button
+        document.getElementById('manual_auto_trade').addEventListener('click', manualAutoTrade);
+    </script>
+
+    <a href="/">Back to Home</a>
+</body>
+</html>
