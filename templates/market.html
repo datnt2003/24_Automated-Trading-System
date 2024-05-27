@@ -1,29 +1,7 @@
-<!-- index.html -->
 {% extends "base.html" %}
 
 {% block content %}
 <style>
-    table {
-        border-collapse: collapse;
-        width: 100%;
-    }
-
-    th,
-    td {
-        border: 1px solid #ddd;
-        padding: 8px;
-        text-align: left;
-    }
-
-    th {
-        background-color: #f2f2f2;
-    }
-
-    canvas {
-        border: 1px solid #ddd;
-    }
-
-    /* Modal styles */
     .modal {
         display: none;
         /* Ẩn modal mặc định */
@@ -58,53 +36,44 @@
         text-decoration: none;
         cursor: pointer;
     }
-
-    /* Button styles */
-    #show-chart-button {
-        position: relative;
-        z-index: 999;
-        margin-bottom: 10px;
-        margin-right: 10px;
-        float: right;
-    }
-
-    #symbol-filter {
-        margin-bottom: 10px;
-    }
-
-    #chart-options {
-        margin-bottom: 10px;
-        margin-right: 10px;
-        float: right;
-    }
 </style>
-<h1>Welcome to Stock Information</h1>
-<button id="show-chart-button">Show Chart</button>
-<input type="text" id="symbol-filter" placeholder="Filter by Symbol...">
-<select id="chart-options">
-    <option value="LastPrice">Last Price</option>
-    <option value="LastVol">Last Volume</option>
-    <option value="BidPrice1">Bid Price</option>
-    <option value="BidVol1">Bid Volume</option>
-    <option value="AskPrice1">Ask Price</option>
-    <option value="AskVol1">Ask Volume</option>
-</select>
-<table id="stock-table">
-    <thead>
-        <tr>
-            <th>Symbol</th>
-            <th>Last Price</th>
-            <th>Last Volume</th>
-            <th>Bid Price</th>
-            <th>Bid Volume</th>
-            <th>Ask Price</th>
-            <th>Ask Volume</th>
-        </tr>
-    </thead>
-    <tbody id="stock-table-body">
-        <!-- Các hàng dữ liệu sẽ được thêm vào đây động -->
-    </tbody>
-</table>
+<div class="container mt-4">
+    <h1>Welcome to Stock Information</h1>
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <input type="text" id="symbol-filter" class="form-control" placeholder="Filter by Symbol...">
+        </div>
+        <div class="col-md-4 text-right">
+            <select id="chart-options" class="form-control">
+                <option value="LastPrice">Last Price</option>
+                <option value="LastVol">Last Volume</option>
+                <option value="BidPrice1">Bid Price</option>
+                <option value="BidVol1">Bid Volume</option>
+                <option value="AskPrice1">Ask Price</option>
+                <option value="AskVol1">Ask Volume</option>
+            </select>
+        </div>
+        <div class="col-md-4 text-right">
+            <button id="show-chart-button" class="btn btn-primary">Show Chart</button>
+        </div>
+    </div>
+    <table id="stock-table" class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Last Price</th>
+                <th>Last Volume</th>
+                <th>Bid Price</th>
+                <th>Bid Volume</th>
+                <th>Ask Price</th>
+                <th>Ask Volume</th>
+            </tr>
+        </thead>
+        <tbody id="stock-table-body">
+            <!-- Các hàng dữ liệu sẽ được thêm vào đây động -->
+        </tbody>
+    </table>
+</div>
 
 <!-- Modal -->
 <div id="chart-modal" class="modal">
@@ -249,6 +218,7 @@
             });
         }
     });
+
     document.addEventListener("DOMContentLoaded", function () {
         // Hàm để gọi lại endpoint khi trang được tải
         function fetchData() {

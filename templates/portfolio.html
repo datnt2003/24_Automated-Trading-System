@@ -4,72 +4,85 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Portfolio</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-    <h1>My Portfolio</h1>
-    {% if error_message %}
-    <p style="color: red;">{{ error_message }}</p>
-    {% endif %}
-    <form action="/trade" method="POST">
-        <label for="symbol">Symbol:</label>
-        <input type="text" id="symbol" name="symbol" required><br><br>
-        <label for="quantity">Quantity:</label>
-        <input type="number" id="quantity" name="quantity" required><br><br>
-        <label for="trade_type">Type:</label>
-        <select id="trade_type" name="trade_type">
-            <option value="buy">Buy</option>
-            <option value="sell">Sell</option>
-        </select><br><br>
-        <!-- Add checkbox for auto trade -->
-        <input type="checkbox" id="auto_trade" name="auto_trade">
-        <label for="auto_trade">Enable auto trade</label><br><br>
-        <input type="submit" value="Trade">
-        <!-- Add button for manual auto trade -->
-        <button type="button" id="manual_auto_trade">Manual Auto Trade</button>
-    </form>
+    <div class="container mt-4">
+        <h1>My Portfolio</h1>
+        {% if error_message %}
+        <div class="alert alert-danger" role="alert">
+            {{ error_message }}
+        </div>
+        {% endif %}
+        <form action="/trade" method="POST" class="mb-4">
+            <div class="form-group">
+                <label for="symbol">Symbol:</label>
+                <input type="text" id="symbol" name="symbol" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="quantity">Quantity:</label>
+                <input type="number" id="quantity" name="quantity" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="trade_type">Type:</label>
+                <select id="trade_type" name="trade_type" class="form-control">
+                    <option value="buy">Buy</option>
+                    <option value="sell">Sell</option>
+                </select>
+            </div>
+            <div class="form-group form-check">
+                <input type="checkbox" id="auto_trade" name="auto_trade" class="form-check-input">
+                <label for="auto_trade" class="form-check-label">Enable auto trade</label>
+            </div>
+            <button type="submit" class="btn btn-primary">Trade</button>
+            <button type="button" id="manual_auto_trade" class="btn btn-secondary">Manual Auto Trade</button>
+        </form>
 
-    <h2>Your Transactions</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Symbol</th>
-                <th>Quantity</th>
-                <th>Type</th>
-                <th>Date</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for transaction in transactions %}
-            <tr>
-                <td>{{ transaction.symbol }}</td>
-                <td>{{ transaction.quantity }}</td>
-                <td>{{ transaction.trade_type }}</td>
-                <td>{{ transaction.date }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+        <h2>Your Transactions</h2>
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Symbol</th>
+                    <th>Quantity</th>
+                    <th>Type</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for transaction in transactions %}
+                <tr>
+                    <td>{{ transaction.symbol }}</td>
+                    <td>{{ transaction.quantity }}</td>
+                    <td>{{ transaction.trade_type }}</td>
+                    <td>{{ transaction.date }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
 
-    <h2>Current Stock Quantity</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Symbol</th>
-                <th>Quantity</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for symbol, quantity in symbol_quantities.items() %}
-            <tr>
-                <td>{{ symbol }}</td>
-                <td>{{ quantity }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+        <h2>Current Stock Quantity</h2>
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Symbol</th>
+                    <th>Quantity</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for symbol, quantity in symbol_quantities.items() %}
+                <tr>
+                    <td>{{ symbol }}</td>
+                    <td>{{ quantity }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
 
-    <h2>Suggested Stock to Buy</h2>
-    <p id="suggested_stock"></p>
+        <h2>Suggested Stock to Buy</h2>
+        <p id="suggested_stock" class="font-weight-bold"></p>
+
+        <a href="/" class="btn btn-link">Back to Home</a>
+    </div>
 
     <script>
         // Function to fetch suggested stock from the server
@@ -88,8 +101,16 @@
 
         // Add event listener to the manual auto trade button
         document.getElementById('manual_auto_trade').addEventListener('click', manualAutoTrade);
+
+        // Placeholder function for manual auto trade
+        function manualAutoTrade() {
+            // Add your manual auto trade logic here
+            alert('Manual Auto Trade triggered!');
+        }
     </script>
 
-    <a href="/">Back to Home</a>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
