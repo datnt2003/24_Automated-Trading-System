@@ -67,6 +67,7 @@
                 <th>Bid Volume</th>
                 <th>Ask Price</th>
                 <th>Ask Volume</th>
+                <th>Action</th>
             </tr>
         </thead>
         <tbody id="stock-table-body">
@@ -85,75 +86,113 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-    var socket = io();
-    var chartData = sessionStorage.getItem('marketData') ? JSON.parse(sessionStorage.getItem('marketData')) : {}; // Đối tượng lưu trữ dữ liệu từ máy chủ
-    var tableBody = document.getElementById('stock-table-body');
-    var chartLabels = []; // Mảng lưu trữ nhãn biểu đồ
-    var selectedOption = "LastPrice"; // Tuỳ chọn mặc định cho biểu đồ
+        var socket = io();
+        var chartData = sessionStorage.getItem('marketData') ? JSON.parse(sessionStorage.getItem('marketData')) : {}; // Đối tượng lưu trữ dữ liệu từ máy chủ
+        var tableBody = document.getElementById('stock-table-body');
+        var chartLabels = []; // Mảng lưu trữ nhãn biểu đồ
+        var selectedOption = "LastPrice"; // Tuỳ chọn mặc định cho biểu đồ
 
-    // Hàm để tải dữ liệu từ sessionStorage khi trang được tải lại hoặc chuyển sang một trang mới
-    function loadChartDataFromSessionStorage() {
-        var storedChartData = sessionStorage.getItem('marketData');
-        if (storedChartData) {
-            chartData = JSON.parse(storedChartData);
-            // Cập nhật bảng dữ liệu với dữ liệu từ sessionStorage
-            Object.keys(chartData).forEach(function (symbol) {
-                updateTableRow(symbol, chartData[symbol]);
-            });
-        }
-    }
-
-    // Gọi lại hàm để tải dữ liệu từ sessionStorage khi trang được tải lại hoặc chuyển sang một trang mới
-    loadChartDataFromSessionStorage();
-
-    // Hàm cập nhật hàng trong bảng dữ liệu và lưu trữ dữ liệu vào sessionStorage
-    function updateTableRow(symbol, data) {
-        if (!chartData[symbol]) {
-            chartData[symbol] = {};
-        }
-        chartData[symbol].LastPrice = data.LastPrice;
-        chartData[symbol].LastVol = data.LastVol;
-        chartData[symbol].BidPrice1 = data.BidPrice1;
-        chartData[symbol].BidVol1 = data.BidVol1;
-        chartData[symbol].AskPrice1 = data.AskPrice1;
-        chartData[symbol].AskVol1 = data.AskVol1;
-
-        if (chartLabels.indexOf(symbol) === -1) {
-            chartLabels.push(symbol);
+        // Hàm để tải dữ liệu từ sessionStorage khi trang được tải lại hoặc chuyển sang một trang mới
+        function loadChartDataFromSessionStorage() {
+            var storedChartData = sessionStorage.getItem('marketData');
+            if (storedChartData) {
+                chartData = JSON.parse(storedChartData);
+                // Cập nhật bảng dữ liệu với dữ liệu từ sessionStorage
+                Object.keys(chartData).forEach(function (symbol) {
+                    updateTableRow(symbol, chartData[symbol]);
+                });
+            }
         }
 
-        if (!document.getElementById(`row-${symbol}`)) {
-            var newRow = tableBody.insertRow();
-            newRow.id = `row-${symbol}`;
-            var symbolCell = newRow.insertCell();
-            symbolCell.textContent = symbol;
-            symbolCell.id = `symbol-${symbol}`;
-            newRow.insertCell().id = `last-price-${symbol}`;
-            newRow.insertCell().id = `last-volume-${symbol}`;
-            newRow.insertCell().id = `bid-price-${symbol}`;
-            newRow.insertCell().id = `bid-volume-${symbol}`;
-            newRow.insertCell().id = `ask-price-${symbol}`;
-            newRow.insertCell().id = `ask-volume-${symbol}`;
-        }
-        var row = document.getElementById(`row-${symbol}`);
-        row.cells[1].textContent = chartData[symbol].LastPrice;
-        row.cells[2].textContent = chartData[symbol].LastVol;
-        row.cells[3].textContent = chartData[symbol].BidPrice1;
-        row.cells[4].textContent = chartData[symbol].BidVol1;
-        row.cells[5].textContent = chartData[symbol].AskPrice1;
-        row.cells[6].textContent = chartData[symbol].AskVol1;
+        // Gọi lại hàm để tải dữ liệu từ sessionStorage khi trang được tải lại hoặc chuyển sang một trang mới
+        loadChartDataFromSessionStorage();
 
-        // Lưu trữ dữ liệu vào sessionStorage sau mỗi lần cập nhật
-        sessionStorage.setItem('marketData', JSON.stringify(chartData));
-    }
+        // Hàm cập nhật hàng trong bảng dữ liệu và lưu trữ dữ liệu vào sessionStorage
+        function updateTableRow(symbol, data) {
+            if (!chartData[symbol]) {
+                chartData[symbol] = {};
+            }
+            chartData[symbol].LastPrice = data.LastPrice;
+            chartData[symbol].LastVol = data.LastVol;
+            chartData[symbol].BidPrice1 = data.BidPrice1;
+            chartData[symbol].BidVol1 = data.BidVol1;
+            chartData[symbol].AskPrice1 = data.AskPrice1;
+            chartData[symbol].AskVol1 = data.AskVol1;
 
-    // Lắng nghe sự kiện 'market_data' từ máy chủ
-    socket.on('market_data', function (data) {
-        if (typeof data.Content === "string") {
-            data.Content = JSON.parse(data.Content);
+            if (chartLabels.indexOf(symbol) === -1) {
+                chartLabels.push(symbol);
+            }
+
+            if (!document.getElementById(`row-${symbol}`)) {
+                var newRow = tableBody.insertRow();
+                newRow.id = `row-${symbol}`;
+                var symbolCell = newRow.insertCell();
+                symbolCell.textContent = symbol;
+                symbolCell.id = `symbol-${symbol}`;
+                newRow.insertCell().id = `last-price-${symbol}`;
+                newRow.insertCell().id = `last-volume-${symbol}`;
+                newRow.insertCell().id = `bid-price-${symbol}`;
+                newRow.insertCell().id = `bid-volume-${symbol}`;
+                newRow.insertCell().id = `ask-price-${symbol}`;
+                newRow.insertCell().id = `ask-volume-${symbol}`;
+                var actionCell = newRow.insertCell();
+                var buyButton = document.createElement('button');
+                buyButton.className = 'btn btn-success';
+                buyButton.textContent = 'Buy';
+                buyButton.addEventListener('click', function () {
+                    buyStock(symbol);
+                });
+                actionCell.appendChild(buyButton);
+            }
+            var row = document.getElementById(`row-${symbol}`);
+            row.cells[1].textContent = chartData[symbol].LastPrice;
+            row.cells[2].textContent = chartData[symbol].LastVol;
+            row.cells[3].textContent = chartData[symbol].BidPrice1;
+            row.cells[4].textContent = chartData[symbol].BidVol1;
+            row.cells[5].textContent = chartData[symbol].AskPrice1;
+            row.cells[6].textContent = chartData[symbol].AskVol1;
+
+            // Lưu trữ dữ liệu vào sessionStorage sau mỗi lần cập nhật
+            sessionStorage.setItem('marketData', JSON.stringify(chartData));
         }
-        updateTableRow(data.Content.Symbol, data.Content);
-    });
+        function buyStock(symbol) {
+            var quantity = prompt(`Enter quantity to buy for ${symbol}:`);
+            if (quantity && !isNaN(quantity)) {
+                fetch('/trade', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        symbol: symbol,
+                        quantity: parseInt(quantity),
+                        trade_type: 'buy'
+                    }),
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Purchase successful!');
+                            window.location.href = '/portfolio'; // Redirect to portfolio page
+                        } else {
+                            alert('Purchase failed: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Purchase failed: ' + error.message);
+                    });
+            } else {
+                alert('Invalid quantity');
+            }
+        }
+        // Lắng nghe sự kiện 'market_data' từ máy chủ
+        socket.on('market_data', function (data) {
+            if (typeof data.Content === "string") {
+                data.Content = JSON.parse(data.Content);
+            }
+            updateTableRow(data.Content.Symbol, data.Content);
+        });
 
         // Lắng nghe sự kiện thay đổi tuỳ chọn biểu đồ
         var chartOptionsSelect = document.getElementById('chart-options');

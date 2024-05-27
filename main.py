@@ -185,6 +185,7 @@ def unlock_user(user_id):
     else:
         abort(404)  # User not found
 
+
 @app.route('/portfolio')
 @login_required
 def portfolio():
@@ -203,48 +204,51 @@ def portfolio():
     error_message = request.args.get('error')
     return render_template('portfolio.html', transactions=user_transactions, symbol_quantities=symbol_quantities, error_message=error_message)
 
-
-
 @app.route('/trade', methods=['POST'])
 @login_required
 def trade():
-    symbol = request.form['symbol']
-    quantity = int(request.form['quantity'])
-    trade_type = request.form['trade_type']
-    
-    # Check if the symbol is in the symbols list
-    if not any(s['Symbol'] == symbol for s in symbols):
-        return redirect(url_for('portfolio', error='Invalid symbol! The symbol does not exist in the market.'))
+    try:
+        data = request.get_json()
+        symbol = data.get('symbol')
+        quantity = int(data.get('quantity'))
+        trade_type = data.get('trade_type')
 
-    # Find the symbol in the symbols list
-    symbol_index = next((index for index, s in enumerate(symbols) if s['Symbol'] == symbol), None)
-    if symbol_index is None:
-        return redirect(url_for('portfolio', error='Invalid symbol! The symbol does not exist in the market.'))
+        # Check if the symbol is in the symbols list
+        if not any(s['Symbol'] == symbol for s in symbols):
+            return jsonify(success=False, message='Invalid symbol! The symbol does not exist in the market.'), 400
 
-    # Ensure that the symbol dictionary has the 'Quantity' key
-    if 'Quantity' not in symbols[symbol_index]:
-        symbols[symbol_index]['Quantity'] = 0
-    
-    if current_user.id not in transactions:
-        transactions[current_user.id] = []
-    
-    # Record the transaction
-    transactions[current_user.id].append({
-        'symbol': symbol,
-        'quantity': quantity,
-        'trade_type': trade_type,
-        'date': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    })
+        # Find the symbol in the symbols list
+        symbol_index = next((index for index, s in enumerate(symbols) if s['Symbol'] == symbol), None)
+        if symbol_index is None:
+            return jsonify(success=False, message='Invalid symbol! The symbol does not exist in the market.'), 400
 
-    # Update the quantity based on trade type
-    if trade_type == 'buy':
-        symbols[symbol_index]['Quantity'] += quantity
-    elif trade_type == 'sell':
-        if symbols[symbol_index]['Quantity'] < quantity:
-            return redirect(url_for('portfolio', error='Not enough stocks to sell!'))
-        symbols[symbol_index]['Quantity'] -= quantity
-    
-    return redirect(url_for('portfolio'))
+        # Ensure that the symbol dictionary has the 'Quantity' key
+        if 'Quantity' not in symbols[symbol_index]:
+            symbols[symbol_index]['Quantity'] = 0
+
+        if current_user.id not in transactions:
+            transactions[current_user.id] = []
+
+        # Record the transaction
+        transactions[current_user.id].append({
+            'symbol': symbol,
+            'quantity': quantity,
+            'trade_type': trade_type,
+            'date': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        })
+
+        # Update the quantity based on trade type
+        if trade_type == 'buy':
+            symbols[symbol_index]['Quantity'] += quantity
+        elif trade_type == 'sell':
+            if symbols[symbol_index]['Quantity'] < quantity:
+                return jsonify(success=False, message='Not enough stocks to sell!'), 400
+            symbols[symbol_index]['Quantity'] -= quantity
+
+        return jsonify(success=True), 200
+
+    except Exception as e:
+        return jsonify(success=False, message=str(e)), 500
 
 # Import necessary libraries
 import random

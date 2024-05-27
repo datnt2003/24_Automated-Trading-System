@@ -14,7 +14,7 @@
             {{ error_message }}
         </div>
         {% endif %}
-        <form action="/trade" method="POST" class="mb-4">
+        <form id="trade-form" class="mb-4">
             <div class="form-group">
                 <label for="symbol">Symbol:</label>
                 <input type="text" id="symbol" name="symbol" class="form-control" required>
@@ -66,13 +66,17 @@
                 <tr>
                     <th>Symbol</th>
                     <th>Quantity</th>
+                    <th>Action</th> <!-- Add this header for the action column -->
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="stock-quantity-table-body">
                 {% for symbol, quantity in symbol_quantities.items() %}
-                <tr>
+                <tr id="stock-row-{{ symbol }}">
                     <td>{{ symbol }}</td>
                     <td>{{ quantity }}</td>
+                    <td>
+                        <button class="btn btn-danger" onclick="sellStock('{{ symbol }}', '{{ quantity }}', this)">Sell</button>
+                    </td> <!-- Add the Sell button here -->
                 </tr>
                 {% endfor %}
             </tbody>
@@ -107,6 +111,84 @@
             // Add your manual auto trade logic here
             alert('Manual Auto Trade triggered!');
         }
+
+        // Function to handle selling a stock
+        function sellStock(symbol, maxQuantity, button) {
+            var quantity = prompt(`Enter quantity to sell for ${symbol} (max: ${maxQuantity}):`);
+            if (quantity && !isNaN(quantity) && quantity <= maxQuantity) {
+                fetch('/trade', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        symbol: symbol,
+                        quantity: parseInt(quantity),
+                        trade_type: 'sell'
+                    }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Sale successful!');
+                        updateStockRow(symbol, quantity, button); // Update the row or remove it
+                    } else {
+                        alert('Sale failed: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Sale failed: ' + error.message);
+                });
+            } else {
+                alert('Invalid quantity');
+            }
+        }
+
+        function updateStockRow(symbol, quantitySold, button) {
+            const row = button.closest('tr');
+            const quantityCell = row.querySelector('td:nth-child(2)');
+            const newQuantity = parseInt(quantityCell.textContent) - quantitySold;
+            if (newQuantity > 0) {
+                quantityCell.textContent = newQuantity;
+            } else {
+                row.parentElement.removeChild(row);
+            }
+        }
+
+        // Function to handle form submission for trade
+        document.getElementById('trade-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const symbol = document.getElementById('symbol').value;
+            const quantity = document.getElementById('quantity').value;
+            const tradeType = document.getElementById('trade_type').value;
+
+            fetch('/trade', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    symbol: symbol,
+                    quantity: parseInt(quantity),
+                    trade_type: tradeType
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Trade successful!');
+                    window.location.reload(); // Reload the page to update the data
+                } else {
+                    alert('Trade failed: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Trade failed: ' + error.message);
+            });
+        });
     </script>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
