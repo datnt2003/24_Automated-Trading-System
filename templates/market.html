@@ -2,168 +2,25 @@
 
 {% block content %}
 <style>
-    /* Custom styles */
-    body {
-        font-family: 'Poppins', sans-serif;
-        background-color: #f9fafb;
-        margin: 0;
-        padding: 0;
-    }
-
-    .container {
-        max-width: 1200px;
-        margin: 20px auto;
-        padding: 20px;
-    }
-
-    .section-header {
-        text-align: center;
-        margin-bottom: 40px;
-    }
-
-    .section-header h1 {
-        font-size: 36px;
-        color: #333;
-        margin-bottom: 10px;
-        text-transform: uppercase;
-    }
-
-    .section-header p {
-        font-size: 18px;
-        color: #666;
-    }
-
-    .filter-input {
-        width: 100%;
-        padding: 15px;
-        margin-bottom: 20px;
-        border: none;
-        border-radius: 8px;
-        background-color: #fff;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        font-size: 16px;
-        box-sizing: border-box;
-    }
-
-    .select-wrapper {
-        position: relative;
-        margin-bottom: 20px;
-    }
-
-    .select-wrapper select {
-        width: 100%;
-        padding: 15px;
-        border: none;
-        border-radius: 8px;
-        background-color: #fff;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        font-size: 16px;
-        appearance: none;
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        background: transparent;
-        cursor: pointer;
-    }
-
-    .select-wrapper:after {
-        content: '\25BC';
-        position: absolute;
-        top: 50%;
-        right: 10px;
-        transform: translateY(-50%);
-        color: #666;
-    }
-
-    .button-wrapper {
-        text-align: right;
-    }
-
-    .button-wrapper button {
-        padding: 15px 30px;
-        background-color: #4CAF50;
-        color: #fff;
-        border: none;
-        border-radius: 8px;
-        font-size: 16px;
-        cursor: pointer;
-        transition: background-color 0.3s;
-    }
-
-    .button-wrapper button:hover {
-        background-color: #45a049;
-    }
-
-    /* Table styles */
-    .stock-table {
-        width: 100%;
-        border-collapse: collapse;
-        border-radius: 8px;
-        overflow: hidden;
-        background-color: #fff;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    .stock-table th,
-    .stock-table td {
-        padding: 15px;
-        text-align: center;
-        border-bottom: 1px solid #ddd;
-    }
-
-    .stock-table th {
-        background-color: #007bff;
-        color: #fff;
-        text-transform: uppercase;
-    }
-
-    .stock-table tbody tr:nth-child(even) {
-        background-color: #f9f9f9;
-    }
-
-    .stock-table tbody tr:hover {
-        background-color: #f1f1f1;
-    }
-
-    .stock-table td {
-        color: #333;
-    }
-
-    .stock-table .btn {
-        padding: 10px 20px;
-        background-color: #007bff;
-        color: #fff;
-        border: none;
-        border-radius: 8px;
-        font-size: 14px;
-        cursor: pointer;
-        transition: background-color 0.3s;
-    }
-
-    .stock-table .btn:hover {
-        background-color: #0056b3;
-    }
-
-    /* Modal styles */
     .modal {
         display: none;
+        /* Ẩn modal mặc định */
         position: fixed;
-        z-index: 1000;
+        z-index: 1;
         left: 0;
         top: 0;
         width: 100%;
         height: 100%;
         overflow: auto;
-        background-color: rgba(0, 0, 0, 0.6);
+        background-color: rgba(0, 0, 0, 0.4);
     }
 
     .modal-content {
         background-color: #fefefe;
-        margin: 5% auto;
-        padding: 30px;
-        border-radius: 8px;
-        width: 90%;
-        max-width: 600px;
-        box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
     }
 
     .close {
@@ -171,37 +28,36 @@
         float: right;
         font-size: 28px;
         font-weight: bold;
-        cursor: pointer;
     }
 
     .close:hover,
     .close:focus {
-        color: #000;
+        color: black;
         text-decoration: none;
         cursor: pointer;
     }
 </style>
-
-<div class="container">
-    <div class="section-header">
-        <h1>Welcome to IUH Trading</h1>
-        <p>Explore real-time stock data</p>
+<div class="container mt-4">
+    <h1>Welcome to Stock Information</h1>
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <input type="text" id="symbol-filter" class="form-control" placeholder="Filter by Symbol...">
+        </div>
+        <div class="col-md-4 text-right">
+            <select id="chart-options" class="form-control">
+                <option value="LastPrice">Last Price</option>
+                <option value="LastVol">Last Volume</option>
+                <option value="BidPrice1">Bid Price</option>
+                <option value="BidVol1">Bid Volume</option>
+                <option value="AskPrice1">Ask Price</option>
+                <option value="AskVol1">Ask Volume</option>
+            </select>
+        </div>
+        <div class="col-md-4 text-right">
+            <button id="show-chart-button" class="btn btn-primary">Show Chart</button>
+        </div>
     </div>
-    <input type="text" id="symbol-filter" class="filter-input" placeholder="Filter by Symbol...">
-    <div class="select-wrapper">
-        <select id="chart-options">
-            <option value="LastPrice">Last Price</option>
-            <option value="LastVol">Last Volume</option>
-            <option value="BidPrice1">Bid Price</option>
-            <option value="BidVol1">Bid Volume</option>
-            <option value="AskPrice1">Ask Price</option>
-            <option value="AskVol1">Ask Volume</option>
-        </select>
-    </div>
-    <div class="button-wrapper">
-        <button id="show-chart-button">Show Chart</button>
-    </div>
-    <table class="stock-table">
+    <table id="stock-table" class="table table-bordered table-striped">
         <thead>
             <tr>
                 <th>Symbol</th>
@@ -215,7 +71,7 @@
             </tr>
         </thead>
         <tbody id="stock-table-body">
-            <!-- Dynamic data rows will be added here -->
+            <!-- Các hàng dữ liệu sẽ được thêm vào đây động -->
         </tbody>
     </table>
 </div>
@@ -224,13 +80,9 @@
 <div id="chart-modal" class="modal">
     <div class="modal-content">
         <span class="close">&times;</span>
-        <h2>Stock Chart</h2>
         <canvas id="chart"></canvas>
-        <p>This is the chart representing stock information.</p>
-        <button id="close-chart-modal" class="btn">Close</button>
     </div>
 </div>
-
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {

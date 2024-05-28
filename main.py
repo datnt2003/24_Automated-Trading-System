@@ -64,7 +64,7 @@ def clean_securities_data(securities_data):
     return cleaned_data
 
 def md_get_securities_list():
-    req = model.securities('HOSE', 1, 100)
+    req = model.securities('HNX', 1, 100)
     securities_data = client.securities(config, req)
     cleaned_data = clean_securities_data(securities_data)
     for security in cleaned_data[:25]:

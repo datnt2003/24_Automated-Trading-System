@@ -3,7 +3,7 @@
 {% block title %}Login{% endblock %}
 
 {% block content %}
-<div class="container mt-4" style="max-width: 300px; margin-top: 150px; padding: 30px; background-color: rgba(0, 0, 0, 0.7); border-radius: 10px; color: #ffffff; text-align: left;">
+<div class="container mt-4">
     <h2 class="mb-4">Login</h2>
     <form method="post" class="needs-validation" novalidate>
         <div class="form-group">
@@ -20,48 +20,18 @@
                 Please enter your password.
             </div>
         </div>
-        <button type="submit" class="btn btn-orange btn-block">Login</button>
+        <button type="submit" class="btn btn-primary">Login</button>
     </form>
 </div>
 
-<style>
-    body {
-        background-image: url('/static/back4.jpg'); /* Adjust this path */
-        background-repeat: no-repeat;
-        background-size: cover;
-        font-family: Arial, sans-serif;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        margin: 0;
-    }
-
-    .container {
-        text-align: center;
-        margin-top: 150px;
-    }
-
-    .form-control {
-        background-color: rgba(255, 255, 255, 0.8);
-        border: none;
-    }
-
-    .btn-orange {
-        background-color: #ff7f00; /* Orange color */
-        border: none;
-    }
-
-    .btn-orange:hover {
-        background-color: #e66000; /* Darker shade of orange on hover */
-    }
-</style>
-
 <script>
+    // Example starter JavaScript for disabling form submissions if there are invalid fields
     (function() {
         'use strict';
         window.addEventListener('load', function() {
+            // Fetch all the forms we want to apply custom Bootstrap validation styles to
             var forms = document.getElementsByClassName('needs-validation');
+            // Loop over them and prevent submission
             var validation = Array.prototype.filter.call(forms, function(form) {
                 form.addEventListener('submit', function(event) {
                     if (form.checkValidity() === false) {
