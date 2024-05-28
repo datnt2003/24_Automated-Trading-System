@@ -8,7 +8,7 @@
 ## CÀI ĐẶT
 
 Hướng dẫn cài đặt và chạy sau khi pull project từ github về Bao gồm:
-- Clone source từ github ``git clone https://github.com/bacnguyenne/Automated-Trading-System.git``
+- Clone source từ github ``git clone [https://github.com/bacnguyenne/Automated-Trading-System.git](https://github.com/datnt2003/24_Automated-Trading-System.git)``
 - Cài đặt thư viện bổ sung bằng file requirements ``pip install -r requirements.txt``
 - Script tạo database (Để script trong thư mục installation)
 - Script tạo dữ liệu (Để script trong thư mục installation)
